@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-const routes = require('./todo/todo.js');
+const routes = require('./todo/control.js');
 
 app.use(routes);
 
@@ -24,7 +24,7 @@ app.use(function (req, res, next) {
 
 
 app.get('/', (req, res) => {
-    res.status(200).json({"test": "Hello"});
+    res.status(200).json({"Hello": "Hello"});
 });
 
 app.post('/', (req, res) => {
