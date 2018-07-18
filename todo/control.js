@@ -16,6 +16,10 @@ router.get("/:link", (req, res, next) => {
     const link = req.params.link;
 
     db.get(`link:${link}`, (err, data) => {
+        if (err) {
+            res.status(400).json({ msg: err });
+        }
+
         res.status(200).json(data);
     });
 });
@@ -30,6 +34,10 @@ router.get('/todo', (req, res) => {
         ids.forEach((id, index) => {
             db.get(id, (error, todos) => {
                 collection.push(todos);
+
+                if (error) {
+                    res.status(404).json({ msg: error });
+                }
 
                 if (index === ids.length - 1) {
                     res.status(200).json(collection);
@@ -79,6 +87,8 @@ router.post('/create', (req, res) => {
                                 db.put("ids", data, error => {
                                     if (!error) {
                                         res.status(200).json(todo);
+                                    } else {
+                                        res.status(400).json({ msg: error });
                                     }
                                 });
                             }
@@ -103,6 +113,8 @@ router.post("/todo/shareable", (req, res, nest) => {
                     res.status(200).json({ link: req.headers.host + "/" + short });
                 }
             });
+        } else {
+            res.status(400).json({ msg: error });
         }
     });
 });
@@ -114,6 +126,8 @@ router.get('/todo/get/:id', (req, res, next) => {
     db.get(req.params.id, (error, data) => {
         if (!error) {
             res.status(200).json(data);
+        } else {
+            res.status(400).json(error);
         }
     });
 });
@@ -124,11 +138,11 @@ router.put('/todo/update/:id', (req, res) => {
     var item = req.body;
 
     db.put(id, item, (err) => {
-        if (err) {
-            return console.log('Ooops!', err);
-            res.status(400).json({ message: "Updated" });
+        if (!err) {
+            res.status(200).json({ message: "Updated" });
         } else {
-
+            return console.log('Ooops!', err);
+            res.status(400).json('Ooops!', err);
         }
 
 
@@ -166,7 +180,9 @@ router.get('/todo/search', (req, res) => {
             db.get(ids[i], (error, todo) => {
                 todo = Array.isArray(todo) ? todo[0] : todo;
 
-                if (todo.title.includes(q)) {
+                if (error) {
+                    res.status(400).json(error);
+                } else if (todo.title.includes(q)) {
                     collection.push(todo);
                 }
 
@@ -253,27 +269,27 @@ function collect(ids, cb) {
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, './uploads');
+        cb(null, './uploads');
     },
     filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now());
+        cb(null, file.fieldname + '-' + Date.now());
     }
-  });
-  
-  router.post('/todo/upload',function(req,res,next){
-  
-    var upload = multer({storage: storage}).single('img');
+});
 
-    upload(req,res,function(err){   
+router.post('/todo/upload', function (req, res, next) {
+
+    var upload = multer({ storage: storage }).single('img');
+
+    upload(req, res, function (err) {
         console.log(req.file);
-        if(err){
-          res.json({success:false,message:err});
+        if (err) {
+            res.json({ success: false, message: err });
         }
-        else{
-          res.json({success:true, message:"Photo was updated !", file: req.file});
-        } 
+        else {
+            res.json({ success: true, message: "Photo was updated !", file: req.file });
+        }
     });
-  });
+});
 
 
 
