@@ -25,7 +25,7 @@ router.get("/:link", (req, res, next) => {
 });
 
 //GETTING TODO LIST
-router.get('/todo', (req, res) => {
+router.get('todo', (req, res) => {
     //res.status(200).json({"todo": todos, length: todos.length});
 
     const collection = [];

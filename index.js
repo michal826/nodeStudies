@@ -4,9 +4,17 @@ const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 
-const routes = require('./todo/control.js');
+const routes = require('./src/control.js');
 
-app.use(routes);
+const path = require('path')
+
+app.use('/api', routes);
+
+app.use(
+    express.static(
+        path.resolve(__dirname, './app')
+    )
+)
 
 app.use(function (req, res, next) {
     // Website you wish to allow to connect
@@ -23,15 +31,11 @@ app.use(function (req, res, next) {
 });
 
 
-app.get('/', (req, res) => {
-    res.status(200).json({"Hello": "Hello"});
+app.get('/home', (req, res) => {
+    res.sendFile(
+        path.resolve(__dirname, 'app', 'index.html')
+    )
 });
-
-app.post('/', (req, res) => {
-    let data = req.body;
-    console.log('data: ', data);
-    res.status(200).json({"status": 'recieved'});
-})
 
 app.listen(8080, () => {
     console.log("Server running on port 8080");
